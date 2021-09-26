@@ -18,6 +18,8 @@ type Product struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Description holds the value of the "description" field.
@@ -68,7 +70,7 @@ func (*Product) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case product.FieldName, product.FieldDescription, product.FieldPublishedAt:
 			values[i] = new(sql.NullString)
-		case product.FieldCreatedAt, product.FieldUpdatedAt:
+		case product.FieldDeletedAt, product.FieldCreatedAt, product.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case product.FieldID:
 			values[i] = new(uuid.UUID)
@@ -94,6 +96,13 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				pr.ID = *value
+			}
+		case product.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				pr.DeletedAt = new(time.Time)
+				*pr.DeletedAt = value.Time
 			}
 		case product.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -172,6 +181,10 @@ func (pr *Product) String() string {
 	var builder strings.Builder
 	builder.WriteString("Product(")
 	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
+	if v := pr.DeletedAt; v != nil {
+		builder.WriteString(", deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", name=")
 	builder.WriteString(pr.Name)
 	builder.WriteString(", description=")

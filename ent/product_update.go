@@ -29,6 +29,26 @@ func (pu *ProductUpdate) Where(ps ...predicate.Product) *ProductUpdate {
 	return pu
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (pu *ProductUpdate) SetDeletedAt(t time.Time) *ProductUpdate {
+	pu.mutation.SetDeletedAt(t)
+	return pu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (pu *ProductUpdate) SetNillableDeletedAt(t *time.Time) *ProductUpdate {
+	if t != nil {
+		pu.SetDeletedAt(*t)
+	}
+	return pu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (pu *ProductUpdate) ClearDeletedAt() *ProductUpdate {
+	pu.mutation.ClearDeletedAt()
+	return pu
+}
+
 // SetName sets the "name" field.
 func (pu *ProductUpdate) SetName(s string) *ProductUpdate {
 	pu.mutation.SetName(s)
@@ -226,6 +246,19 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := pu.mutation.DeletedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: product.FieldDeletedAt,
+		})
+	}
+	if pu.mutation.DeletedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: product.FieldDeletedAt,
+		})
+	}
 	if value, ok := pu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -326,6 +359,26 @@ type ProductUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProductMutation
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (puo *ProductUpdateOne) SetDeletedAt(t time.Time) *ProductUpdateOne {
+	puo.mutation.SetDeletedAt(t)
+	return puo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (puo *ProductUpdateOne) SetNillableDeletedAt(t *time.Time) *ProductUpdateOne {
+	if t != nil {
+		puo.SetDeletedAt(*t)
+	}
+	return puo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (puo *ProductUpdateOne) ClearDeletedAt() *ProductUpdateOne {
+	puo.mutation.ClearDeletedAt()
+	return puo
 }
 
 // SetName sets the "name" field.
@@ -548,6 +601,19 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.DeletedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: product.FieldDeletedAt,
+		})
+	}
+	if puo.mutation.DeletedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: product.FieldDeletedAt,
+		})
 	}
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

@@ -3,20 +3,23 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/leeliwei930/go_commerce/repository"
 )
 
-type ErrorResponse struct {
-}
-
 type ResponsePayload struct {
-	Status int         `json:"status"`
-	Data   interface{} `json:"data,omitempty"`
-	Errors interface{} `json:"errors,omitempty"`
+	Status    int                          `json:"status"`
+	Paginator *repository.PaginatorPayload `json:"paginator,omitempty"`
+	Data      interface{}                  `json:"data,omitempty"`
+	Errors    interface{}                  `json:"errors,omitempty"`
 }
 
-func (r *ResponsePayload) JSON(status int, data interface{}) ([]byte, error) {
+func (r *ResponsePayload) JSON(status int, data interface{}, paginator *repository.PaginatorPayload) ([]byte, error) {
 	r.Data = data
 	r.Status = status
+	if paginator != nil {
+		r.Paginator = paginator
+	}
 	return json.Marshal(r)
 }
 

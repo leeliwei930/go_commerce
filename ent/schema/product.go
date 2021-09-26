@@ -41,3 +41,10 @@ func (Product) Edges() []ent.Edge {
 		edge.From("brand", Brand.Type).Ref("products").Unique(),
 	}
 }
+
+// Mixin of the Product.
+func (Product) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		SoftDeleteMixin{},
+	}
+}

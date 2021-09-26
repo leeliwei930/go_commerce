@@ -13,6 +13,8 @@ const (
 	Label = "product"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -41,6 +43,7 @@ const (
 // Columns holds all SQL columns for product fields.
 var Columns = []string{
 	FieldID,
+	FieldDeletedAt,
 	FieldName,
 	FieldDescription,
 	FieldIsActive,

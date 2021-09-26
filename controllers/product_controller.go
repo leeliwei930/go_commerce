@@ -1,14 +1,13 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/leeliwei930/go_commerce/ent"
+	"github.com/leeliwei930/go_commerce/inputs"
 	"github.com/leeliwei930/go_commerce/repository"
 	"github.com/leeliwei930/go_commerce/services"
 )
@@ -53,8 +52,8 @@ func CreateProduct(response http.ResponseWriter, request *http.Request) {
 		Client: services.GetDefaultDBClient(),
 	}
 
-	product := &ent.Product{}
-	productErr := json.NewDecoder(request.Body).Decode(product)
+	product := &inputs.ProductRequest{}
+	productErr := inputs.BindFromJSON(request.Body, product)
 
 	if productErr != nil {
 		productResponse, _ := Response().Error(http.StatusUnprocessableEntity, productErr)
@@ -63,7 +62,7 @@ func CreateProduct(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	product, createErr := productRepo.CreateProduct(request.Context(), product)
+	createdProduct, createErr := productRepo.CreateProduct(request.Context(), product)
 	if createErr != nil {
 		productCreateErrResponse, _ := Response().Error(http.StatusInternalServerError, createErr)
 		response.WriteHeader(http.StatusInternalServerError)
@@ -71,7 +70,7 @@ func CreateProduct(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	productResponse, _ := Response().JSON(http.StatusAccepted, product, nil)
+	productResponse, _ := Response().JSON(http.StatusAccepted, createdProduct, nil)
 
 	response.Write(productResponse)
 
@@ -106,6 +105,22 @@ func FindProduct(response http.ResponseWriter, request *http.Request) {
 	response.Write(productResponse)
 
 }
+
+// func UpdateProduct(response http.ResponseWriter, request *http.Request) {
+// 	productRepo := repository.ProductRepository{
+// 		Client: services.GetDefaultDBClient(),
+// 	}
+// 	path := mux.Vars(request)
+
+// 	productID, productIDErr := uuid.Parse(path["id"])
+
+// 	if productIDErr != nil {
+// 		productIDErrResponse, _ := Response().Error(http.StatusBadRequest, productIDErr)
+// 		response.Write(productIDErrResponse)
+// 		return
+// 	}
+
+// }
 
 func DeleteProduct(response http.ResponseWriter, request *http.Request) {
 	productRepo := repository.ProductRepository{

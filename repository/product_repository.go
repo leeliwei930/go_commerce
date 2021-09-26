@@ -7,7 +7,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/leeliwei930/go_commerce/ent"
+	"github.com/leeliwei930/go_commerce/ent/brand"
 	"github.com/leeliwei930/go_commerce/ent/product"
+	"github.com/leeliwei930/go_commerce/inputs"
 )
 
 type ProductRepository struct {
@@ -16,9 +18,13 @@ type ProductRepository struct {
 
 func (repository *ProductRepository) PaginateProduct(c context.Context, option *PaginatorOption) (products []*ent.Product, paginator *PaginatorPayload, productsErr error) {
 	productQuery := repository.Client.Product.Query()
-	if !option.WithTrashed {
+
+	if option.WithTrashed {
 		productQuery.Where(product.DeletedAtNotNil())
+	} else {
+		productQuery.Where(product.DeletedAtIsNil())
 	}
+
 	resultsCount, _ := productQuery.Count(c)
 
 	paginator = &PaginatorPayload{
@@ -32,17 +38,48 @@ func (repository *ProductRepository) PaginateProduct(c context.Context, option *
 	return
 }
 
-func (repository *ProductRepository) CreateProduct(c context.Context, product *ent.Product) (*ent.Product, error) {
-	productCreate := repository.Client.Product.Create()
-	return productCreate.SetName(product.Name).
+func (repository *ProductRepository) CreateProduct(c context.Context, product *inputs.ProductRequest) (*ent.Product, error) {
+
+	createQuery := repository.Client.Product.Create()
+
+	if product.BrandID != nil {
+		brand, brandErr := repository.Client.Brand.Query().Where(brand.IDEQ(*product.BrandID)).First(c)
+		if brandErr != nil {
+			return nil, brandErr
+		} else {
+			createQuery = createQuery.SetBrand(brand)
+		}
+	}
+
+	return createQuery.SetName(product.Name).
 		SetDescription(product.Description).
-		SetPublishedAt(*product.PublishedAt).
+		SetPublishedAt(product.PublishedAt).
 		Save(c)
 
 }
 
 func (repository *ProductRepository) FindProduct(c context.Context, id uuid.UUID) (*ent.Product, error) {
 	return repository.Client.Product.Query().Where(product.IDEQ(id)).First(c)
+}
+
+func (repository *ProductRepository) UpdateProduct(c context.Context, id uuid.UUID, product *inputs.ProductRequest) (*ent.Product, error) {
+
+	updateQuery := repository.Client.Product.UpdateOneID(id)
+
+	if product.BrandID != nil {
+		brand, brandErr := repository.Client.Brand.Query().Where(brand.IDEQ(*product.BrandID)).First(c)
+		if brandErr != nil {
+			return nil, brandErr
+		} else {
+			updateQuery.SetBrand(brand)
+		}
+	}
+
+	return updateQuery.SetName(product.Name).
+		SetDescription(product.Description).
+		SetPublishedAt(product.PublishedAt).
+		Save(c)
+
 }
 
 func (repository *ProductRepository) DeleteProduct(c context.Context, id uuid.UUID) (*ent.Product, error) {

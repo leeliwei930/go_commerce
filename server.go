@@ -23,6 +23,7 @@ func StartServer() {
 	muxRouter.Use(controllers.InjectJSONResponseHeader)
 
 	muxRouter.HandleFunc("/brand", controllers.FetchBrand).Methods(http.MethodGet)
+	muxRouter.HandleFunc("/brand/create", controllers.CreateBrand).Methods(http.MethodPost)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf("0.0.0.0:%s", os.Getenv("APP_PORT")),
